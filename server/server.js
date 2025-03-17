@@ -4,19 +4,22 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middlewares/errorMiddleware");
-const { activityLogger } = require("./middlewares/logger");
+const notFoundRoute = require("./middlewares/notFoundRoute");
+const cookieParser = require("cookie-parser");
 
 const app = express();
+
+app.use(express.json());
+app.use(cookieParser());
 require("dotenv").config();
 connectDB();
-
 
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/user", userRoutes);
 
 app.use(errorHandler);
-
+app.use(notFoundRoute);
 
 app.listen(process.env.PORT, (err) => {
     console.log(`server is running on port ${process.env.PORT}`);
