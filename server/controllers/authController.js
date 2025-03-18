@@ -1,6 +1,8 @@
 const User = require("../models/userModel");
 const Admin = require("../models/adminModel");
 
+const jwt = require("jsonwebtoken");
+
 ////////////////////////////////// LOGIN ///////////////////////////////
 
 module.exports.studentLogin = async (req, res) => {
@@ -25,6 +27,6 @@ module.exports.studentLogin = async (req, res) => {
 
         res.status(200).json({ message: "Login successful", user });
     } catch (error) {
-        res.send;
+        res.status(500).json({ message: "Login failed", error: error.message });
     }
 };

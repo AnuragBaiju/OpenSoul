@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const LandingPage = () => {
     // Animation Variants
@@ -41,14 +42,16 @@ const LandingPage = () => {
                     <motion.p className="text-lg md:text-xl mb-6" variants={fadeInUp}>
                         Pour your heart out, connect with campus souls—anonymous and free.
                     </motion.p>
-                    <motion.button
-                        className="bg-teal-500 text-white px-6 py-3 rounded-full text-lg font-semibold"
-                        variants={buttonVariants}
-                        initial="rest"
-                        whileHover="hover"
-                    >
-                        Share Your Soul
-                    </motion.button>
+                    <Link to="/login">
+                        <motion.button
+                            className="bg-teal-500 cursor-pointer text-white px-4 py-2.5   rounded-full text-lg font-semibold"
+                            variants={buttonVariants}
+                            initial="rest"
+                            whileHover="hover"
+                        >
+                            Share Your Soul
+                        </motion.button>
+                    </Link>
                     <motion.a href="#groups" className="block mt-4 underline text-sm md:text-base" variants={fadeInUp}>
                         Discover Groups
                     </motion.a>

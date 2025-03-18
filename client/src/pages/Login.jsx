@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import loginBg from "../assets/LoginBg.jpg";
+import loginBg from "/public/assets/LoginBg.jpg";
 
 const Login = () => {
     // React Hook Form setup
@@ -19,6 +19,7 @@ const Login = () => {
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1000));
         console.log("Form submitted:", data);
+        window.location.replace('/home')
     };
 
     // Animation variants
