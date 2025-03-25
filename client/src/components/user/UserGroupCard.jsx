@@ -1,15 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-import { joinGroup } from "../../apis/userApis";
 
-const ConfessionGroupCard = ({ group }) => {
-    const handleJoinGroup = async (groupID) => {
-        await joinGroup(groupID);
-        window.location.reload();
-    };
 
+const UserGroupCard = ({ group }) => {
+    const navigate = useNavigate()
+    
     return (
-        <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
+        <div onClick={()=>navigate(`/confession-page/${group._id}`)} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
             <div className="relative group rounded-xl overflow-hidden text-white shadow-lg transition-all duration-700 h-full flex flex-col justify-between">
                 {/* Background Image Layer */}
 
@@ -30,13 +28,6 @@ const ConfessionGroupCard = ({ group }) => {
                     </div>
                     <div className="flex justify-between items-center text-xs text-white">
                         <span>Created by: {group?.createdBy.substring(0, 8)}...</span>
-
-                        <button
-                            onClick={() => handleJoinGroup(group._id)}
-                            className=" hover:scale-105  bg-gradient-to-br from-blue-600 to-blue-900 whitespace-nowrap bg-opacity-20 duration-300 cursor-pointer transition hover:bg-opacity-30 px-3 py-1 rounded-md"
-                        >
-                            Join Group
-                        </button>
                     </div>
                 </div>
             </div>
@@ -44,4 +35,4 @@ const ConfessionGroupCard = ({ group }) => {
     );
 };
 
-export default ConfessionGroupCard;
+export default UserGroupCard;

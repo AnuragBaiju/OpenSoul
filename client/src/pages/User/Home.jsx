@@ -3,6 +3,7 @@ import ConfessionGroups from "../../components/confession/ConfessionGroup";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import { getConfessionGroups } from "../../apis/userApis";
+import UserGroups from "./UserGroups";
 
 const Home = () => {
     const [confessionGroups, setConfessionGroups] = useState([]);
@@ -17,7 +18,8 @@ const Home = () => {
     }, []);
 
     return (
-        <div className=" bg-black bg-gradient-to-bl from-current to-blue-500 ">
+        <div className="w-screen">
+            <UserGroups/>
             <ConfessionGroups groups={confessionGroups} />
         </div>
     );

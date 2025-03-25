@@ -7,10 +7,18 @@ const { verifyToken } = require("../middlewares/authMiddleware");
 router.use(verifyToken);
 
 // Create a new confession
-router.post("/confession", userController.createConfession);
+router.post("/confession/:groupId", userController.createConfession);
 
 // Get all confessions in a group
 router.get("/confession/group/:groupId", userController.getConfessionsByGroup);
+
+router.get("/other-groups", verifyToken, userController.getOtherConfessionGroups);
+
+router.get("/confession-groups", verifyToken, userController.getAllConfessionGroups);
+
+router.get("/confession-groups/:groupId", userController.getConfessionGroup);
+
+router.post("/join-group/:groupId", userController.joinGroup);
 
 // Like/unlike a confession
 router.post("/confession/:confessionId/like", userController.likeConfession);

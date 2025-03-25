@@ -17,10 +17,6 @@ const confessionSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        anonymous: {
-            type: Boolean,
-            default: true,
-        },
         likes: [
             {
                 type: mongoose.Schema.Types.ObjectId,

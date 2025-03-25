@@ -1,21 +1,23 @@
 const express = require("express");
 const adminController = require("../controllers/adminController");
+const { verifyToken } = require("../middlewares/authMiddleware");
+const upload = require("../middlewares/multer");
 const router = express.Router();
 
+router.use(verifyToken);
 
+router
+    .route("/confession-group")
+    .post(upload.single("bgImage"),adminController.createConfessionGroup)
+    .get(adminController.getAllConfessionGroups);
 
-router.route('/confession-group')
-    .post(  adminController.createConfessionGroup)
-    .get(  adminController.getAllConfessionGroups);
+router
+    .route("/confession-group/:id")
+    .get(adminController.getConfessionGroup)
+    .put(adminController.updateConfessionGroup)
+    .delete(adminController.deleteConfessionGroup);
 
-router.route('/confession-group/:id')
-    .get(  adminController.getConfessionGroup)
-    .put(  adminController.updateConfessionGroup)
-    .delete(  adminController.deleteConfessionGroup);
-
-router.route('/confession-group/:id/add-member')
-    .put(  adminController.addMember);
-
+router.route("/confession-group/:id/add-member").put(adminController.addMember);
 
 router.get("/student", adminController.getAllStudents);
 router.get("/student/:id", adminController.getStudentById);

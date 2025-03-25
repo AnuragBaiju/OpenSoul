@@ -2,10 +2,10 @@ const UserGroups = ({ groups }) => (
     <div className="bg-slate-100 rounded-lg shadow-lg p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Groups</h3>
         <div className="space-y-4">
-            {groups.map((group, index) => (
+            {groups?.map((group, index) => (
                 <div key={index} className="flex items-center space-x-4">
                     <img
-                        src={group.image}
+                        src={group.bgImage}
                         alt={group.name}
                         className="w-12 h-12 rounded-md object-cover"
                         loading="lazy"

@@ -12,6 +12,10 @@ const confessionGroupSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
+        bgImage: {
+            type: String,
+            default: "https://res.cloudinary.com/dunf6rko6/image/upload/v1742383700/1330502_h2hmsy.jpg",
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -29,10 +33,6 @@ const confessionGroupSchema = new mongoose.Schema(
                 ref: "Confession",
             },
         ],
-        isPublic: {
-            type: Boolean,
-            default: true,
-        },
     },
     { timestamps: true }
 );

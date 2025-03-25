@@ -1,12 +1,14 @@
 const jwt = require("jsonwebtoken");
 
-
 /////////////////////// VERIFY TOKEN /////////////////////////
 
 module.exports.verifyToken = (req, res, next) => {
+
     const adminToken = req.cookies.admin_token;
     const userToken = req.cookies.user_token;
-    let token = adminToken || userToken; // Use whichever token is available
+    let token = adminToken || userToken; 
+
+    console.log(req.cookies);
 
     if (!token) {
         return res.status(401).json({ message: "Access Denied. No token provided." });

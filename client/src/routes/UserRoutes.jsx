@@ -3,8 +3,9 @@ import Home from "../pages/User/Home";
 import UserProfileDashboard from "../pages/User/UserProfileDashboard";
 import UserLayout from "../layouts/UserLayout";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
-import GroupConfessionPage from "../components/confession/GroupConfessionPage";
 import Login from "../pages/auth/Login";
+import GroupConfessionPage from "../pages/User/GroupConfessionPage";
+import ConfessionGroups from "../pages/User/ConfessionGroups";
 
 function UserRoutes() {
     return (
@@ -13,7 +14,8 @@ function UserRoutes() {
             <Route path="/" element={<UserLayout />}>
                 <Route path="/home" element={<Home />} />
                 <Route path="/profile" element={<UserProfileDashboard />} />
-                <Route path="/confession-page/:confessionId" element={<GroupConfessionPage />} />
+                <Route path="/confession-page/:groupId" element={<GroupConfessionPage />} />
+                <Route path="/groups" element={<ConfessionGroups />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
