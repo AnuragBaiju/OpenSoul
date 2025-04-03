@@ -16,7 +16,7 @@ const ConfessionGroups = () => {
     }, []);
 
     return (
-        <div>
+        <div className=" w-screen">
             <AllConfessionGroups groups={groups} allGroups={true} />
         </div>
     );

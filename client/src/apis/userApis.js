@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { userInstance } from "../config/axiosConfig";
 
 export const getConfessionGroups = async () => {
@@ -24,6 +25,7 @@ export const joinGroup = async (groupId) => {
         const response = await userInstance.post(`/join-group/${groupId}`);
         return response.data;
     } catch (error) {
+        toast.error(error.response.data.message);
         console.error("join group API error:", error);
         throw error;
     }
@@ -32,7 +34,6 @@ export const joinGroup = async (groupId) => {
 export const getGroupById = async (groupId) => {
     try {
         const response = await userInstance.get(`/confession-groups/${groupId}`);
-        console.log(response);
         return response.data;
     } catch (error) {
         console.error("get group API error:", error);
@@ -40,9 +41,9 @@ export const getGroupById = async (groupId) => {
     }
 };
 
-export const postConfession = async (groupId, text) => {
+export const postConfession = async (groupId, data) => {
     try {
-        const response = await userInstance.post(`/confession/${groupId}`, { text });
+        const response = await userInstance.post(`/confession/${groupId}`, data);
         return response.data;
     } catch (error) {
         console.error("post confession API error:", error);
@@ -58,6 +59,29 @@ export const postComment = async (confessionId, text) => {
         return response.data;
     } catch (error) {
         console.error("post comment API error:", error);
+        throw error;
+    }
+};
+// Like post
+
+export const likeConfession = async (confessionId) => {
+    try {
+        const response = await userInstance.post(`/confession/${confessionId}/like`);
+        return response.data;
+    } catch (error) {
+        console.error("post comment API error:", error);
+        throw error;
+    }
+};
+
+// delete confession
+
+export const deleteConfession = async (confessionId) => {
+    try {
+        const response = await userInstance.delete(`/confession/${confessionId}`);
+        return response.data;
+    } catch (error) {
+        console.error("delete confession API error:", error);
         throw error;
     }
 };

@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const ConfessionGroup = require("../models/confessionGroupModel");
 const s3 = require("../config/s3");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const Confession = require("../models/confessionModel");
 
 // Get all users
 module.exports.getAllStudents = async (req, res) => {
@@ -88,11 +89,10 @@ module.exports.createConfessionGroup = async (req, res) => {
         const { name, description } = req.body;
         let fileUrl = null; // Default to null if no file is uploaded
 
-        console.log(req.body, req.file);
-
         if (req.file) {
             const file = req.file;
-            const fileKey = `uploads/${Date.now()}_${file.originalname}`;
+            // const fileKey = `uploads/${Date.now()}_${file.originalname}`;
+            const fileKey = req.file.originalname;
 
             // Upload file to S3
             const uploadParams = {
@@ -117,7 +117,7 @@ module.exports.createConfessionGroup = async (req, res) => {
 
         // Only add bgImage if a file was uploaded
         if (fileUrl) {
-            confessionGroupData.bgImage = fileUrl;
+            confessionGroupData.groupIcon = fileUrl;
         }
 
         // Create and save the Confession Group
@@ -187,13 +187,37 @@ module.exports.getConfessionGroup = async (req, res) => {
 // Update confession group
 module.exports.updateConfessionGroup = async (req, res) => {
     try {
-        const { name, description, isPublic } = req.body;
+        const { name, description } = req.body;
 
-        const confessionGroup = await ConfessionGroup.findByIdAndUpdate(
-            req.params.id,
-            { name, description, isPublic },
-            { new: true, runValidators: true }
-        );
+
+        const updateData = { name, description };
+
+        // If a file was uploaded, add groupIcon to updateData
+        if (req.file) {
+            const file = req.file;
+            // const fileKey = `uploads/${Date.now()}_${file.originalname}`;
+            const fileKey = req.file.originalname;
+
+            // Upload file to S3
+            const uploadParams = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: fileKey,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            };
+
+            await s3.send(new PutObjectCommand(uploadParams));
+
+            // Construct File URL
+            fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+
+            updateData.groupIcon = fileUrl; // Store file path
+        }
+
+        let confessionGroup = await ConfessionGroup.findByIdAndUpdate(req.params.id, updateData, {
+            new: true,
+            runValidators: true,
+        });
 
         if (!confessionGroup) {
             return res.status(404).json({
@@ -261,6 +285,67 @@ module.exports.addMember = async (req, res) => {
         res.status(400).json({
             success: false,
             message: error.message,
+        });
+    }
+};
+
+//get group confessions
+
+module.exports.getGroupConfessions = async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const confessions = await Confession.find({ confessionGroup: groupId }).populate("user", "name");
+        res.status(200).json({ message: "Confessions fetched successfully", confessions });
+    } catch (error) {
+        res.status(500).json({ message: "Confessions fetched failed", error: error.message });
+    }
+};
+
+// delete confession
+
+module.exports.deleteConfession = async (req, res) => {
+    try {
+        const { groupId, confessionId } = req.params;
+
+        // Find the group and update it by pulling the confessionId from the confessions array
+        const updatedGroup = await ConfessionGroup.findByIdAndUpdate(
+            groupId,
+            { $pull: { confessions: confessionId } }, // Remove confessionId from confessions array
+            { new: true, runValidators: true } // Return updated document and run validators
+        );
+
+        // Check if the group exists
+        if (!updatedGroup) {
+            return res.status(404).json({
+                success: false,
+                message: "Confession group not found",
+            });
+        }
+
+        await Confession.findByIdAndDelete(confessionId);
+
+        // Optional: Check if the confessionId was actually in the array
+        // If confessions array didn't change, it might mean the confessionId wasn't found
+        const confessionExisted = updatedGroup.confessions.some((id) => id.toString() === confessionId);
+        if (!confessionExisted && updatedGroup.confessions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Confession not found in this group",
+            });
+        }
+
+
+        // Success response
+        res.status(200).json({
+            success: true,
+            message: "Confession deleted successfully",
+            data: updatedGroup,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete confession",
+            error: error.message,
         });
     }
 };

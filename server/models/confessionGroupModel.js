@@ -12,7 +12,7 @@ const confessionGroupSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        bgImage: {
+        groupIcon: {
             type: String,
             default: "https://res.cloudinary.com/dunf6rko6/image/upload/v1742383700/1330502_h2hmsy.jpg",
         },

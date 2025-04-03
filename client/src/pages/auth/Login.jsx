@@ -23,6 +23,7 @@ const Login = () => {
         // Simulate API call
 
         const res = await login(data);
+        console.log(res);
         toast.success(res.message);
 
         navigate("/home");
@@ -69,7 +70,7 @@ const Login = () => {
                         className="mx-auto h-20 w-auto"
                     /> */}
 
-                    <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
+                    <h2 className=" text-center text-2xl/9 font-bold tracking-tight text-gray-900">
                         Sign in to your account
                     </h2>
                 </motion.div>
@@ -128,11 +129,7 @@ const Login = () => {
                         </motion.div>
                     </form>
 
-                    <motion.p variants={childVariants} className="mt-10 text-center text-sm/6 text-gray-500">
-                        <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                            Start a 14 day free trial
-                        </a>
-                    </motion.p>
+                    
                 </motion.div>
             </motion.div>
         </>

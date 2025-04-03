@@ -4,10 +4,9 @@ const AdminHeader = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const navItems = [
-        { name: "Dashboard", href: "/dashboard" },
+        { name: "Dashboard", href: "/admin/dashboard" },
         { name: "Groups", href: "/admin/groups" },
         { name: "Students", href: "/admin/students" },
-        { name: "Profile", href: "/profile" },
     ];
 
     return (
@@ -16,7 +15,7 @@ const AdminHeader = () => {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <div className="flex-shrink-0 px-5">
-                        <a href="/home" className="text-2xl font-bold font-sans tracking-tight ">
+                        <a href="/admin/dashboard" className="text-2xl font-bold font-sans tracking-tight ">
                             Dashboard
                         </a>
                     </div>

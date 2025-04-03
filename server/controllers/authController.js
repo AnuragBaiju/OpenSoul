@@ -15,13 +15,25 @@ module.exports.studentLogin = async (req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
         // 🔥 Clear both admin and user tokens before setting the new one
-        res.clearCookie("admin_token");
-        res.clearCookie("user_token");
+        res.cookie("admin_token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0), // ✅ Forces removal
+            maxAge: 0,
+        });
+        res.cookie("user_token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0),
+            maxAge: 0,
+        });
 
         res.cookie("user_token", token, {
             httpOnly: true,
             secure: true,
-            sameSite: "Strict",
+            sameSite: "None",
             maxAge: 60 * 60 * 1000,
         });
 
@@ -43,13 +55,25 @@ module.exports.adminLogin = async (req, res) => {
         const token = jwt.sign({ id: admin._id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
         // 🔥 Clear both admin and user tokens before setting the new one
-        res.clearCookie("admin_token");
-        res.clearCookie("user_token");
+        res.cookie("admin_token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0), // ✅ Forces removal
+            maxAge: 0,
+        });
+        res.cookie("user_token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0),
+            maxAge: 0,
+        });
 
         res.cookie("admin_token", token, {
             httpOnly: true,
             secure: true,
-            sameSite: "Strict",
+            sameSite: "None",
             maxAge: 60 * 60 * 1000,
         });
 
@@ -61,7 +85,6 @@ module.exports.adminLogin = async (req, res) => {
 
 module.exports.me = async (req, res) => {
     try {
-        console.log("from me!");
         const role = req.user.role;
         let user = null;
         if (role === "Admin") {
@@ -70,9 +93,32 @@ module.exports.me = async (req, res) => {
             user = await User.findById(req.user.id).populate("confessionGroups");
         }
 
-        console.log(user);
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: "Server error" });
+    }
+};
+
+module.exports.logout = (req, res) => {
+    try {
+        // Clear both tokens to handle both roles dynamically
+        res.cookie("admin_token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0), // ✅ Forces removal
+            maxAge: 0,
+        });
+        res.cookie("user_token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0),
+            maxAge: 0,
+        });
+
+        res.status(200).json({ message: "Logout successful" });
+    } catch (error) {
+        res.status(500).json({ message: "Logout failed", error: error.message });
     }
 };

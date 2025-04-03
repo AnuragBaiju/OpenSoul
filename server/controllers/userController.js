@@ -1,41 +1,71 @@
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = require("../config/s3");
 const ConfessionGroup = require("../models/confessionGroupModel");
 const Confession = require("../models/confessionModel");
 const User = require("../models/userModel");
 
 // Create a new confession
+
 module.exports.createConfession = async (req, res) => {
-    console.log("hello from create chat");
     try {
         const groupId = req.params.groupId;
-        const { text } = req.body;
-        const user = req.user.id; // Assuming you're using authentication middleware
+        const { title, body } = req.body;
 
-        // Find the group
+        const user = req.user.id; // Assuming authentication middleware is used
+
+        let fileUrl = null; // Default to null if no file is uploaded
+
+        if (req.file) {
+            const file = req.file;
+            // const fileKey = `uploads/${Date.now()}_${file.originalname}`;
+            const fileKey = req.file.originalname;
+
+            // Upload file to S3
+            const uploadParams = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: fileKey,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            };
+
+            await s3.send(new PutObjectCommand(uploadParams));
+
+            // Construct File URL
+            fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+        }
+
+        // Find the confession group
         const group = await ConfessionGroup.findById(groupId);
         if (!group) {
             return res.status(404).json({ message: "Confession group not found" });
         }
 
-        // Create confession
-        let confession = new Confession({
+        // Create new confession
+        let confession = {
             user,
             confessionGroup: groupId,
-            text,
-        });
+            title,
+            body,
+        };
 
-        // Save confession first
-        await confession.save();
+        if (fileUrl) {
+            confession.image = fileUrl;
+        }
 
-        // Populate user after saving
-        confession = await confession.populate("user");
+        // Save confession
+        const newConfession = new Confession(confession);
+        let savedConfession = await newConfession.save();
 
-        // Update group
-        group.confessions.push(confession._id);
+        // Populate user data
+        savedConfession = await savedConfession.populate("user");
+
+        // Add confession ID to group
+        group.confessions.push(savedConfession._id);
         await group.save();
 
-        res.status(201).json(confession);
+        res.status(201).json(savedConfession);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: "Error creating confession", error: error.message });
     }
 };
@@ -70,8 +100,8 @@ module.exports.getConfessionGroup = async (req, res) => {
         const confessionGroup = await ConfessionGroup.findById(groupId).populate({
             path: "confessions",
             populate: [
-                { path: "user", select: "name" }, // Populate confession owner
-                { path: "comments.user", select: "name" }, // Populate user in comments
+                { path: "user", select: "username" }, // Populate confession owner
+                { path: "comments.user", select: "username" }, // Populate user in comments
             ],
         });
         res.status(200).json({ message: "success", confessionGroup });
@@ -86,12 +116,29 @@ module.exports.getConfessionGroup = async (req, res) => {
 module.exports.joinGroup = async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const confessionGroup = await ConfessionGroup.findByIdAndUpdate(groupId, { $push: { members: req.user.id } });
-        await User.findByIdAndUpdate(req.user.id, { $push: { confessionGroups: confessionGroup._id } });
-        res.status(200).json({ message: "success", confessionGroup });
+        const userId = req.user.id;
+
+        // Check if user is already a member
+        const confessionGroup = await ConfessionGroup.findById(groupId);
+        if (!confessionGroup) {
+            return res.status(404).json({ message: "Group not found" });
+        }
+
+        if (confessionGroup.members.includes(userId)) {
+            return res.status(400).json({ message: "User is already a member of this group" });
+        }
+
+        // Add user to the group
+        confessionGroup.members.push(userId);
+        await confessionGroup.save();
+
+        // Add group to user's joined groups
+        await User.findByIdAndUpdate(userId, { $addToSet: { confessionGroups: confessionGroup._id } });
+
+        res.status(200).json({ message: "Success", confessionGroup });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Error geting confession groups", error: error.message });
+        res.status(500).json({ message: "Error joining confession group", error: error.message });
     }
 };
 
@@ -100,9 +147,9 @@ module.exports.getConfessionsByGroup = async (req, res) => {
     try {
         const { groupId } = req.params;
         const confessions = await Confession.find({ confessionGroup: groupId })
-            .populate("user", "name") // Only populate username if not anonymous
+            .populate("user", "username") // Only populate username if not anonymous
             .populate("likes", "username")
-            .populate("comments.user", "name")
+            .populate("comments.user", "username")
             .sort({ createdAt: -1 });
 
         res.json(confessions);
@@ -130,7 +177,12 @@ module.exports.likeConfession = async (req, res) => {
         }
 
         await confession.save();
-        res.json(confession);
+        // Populate likes and comments before sending the response
+        const updatedConfession = await Confession.findById(confessionId)
+            .populate("comments.user", "username") // Populate comments' user field
+            .populate("user"); // Populate user field
+
+        res.json(updatedConfession);
     } catch (error) {
         res.status(500).json({ message: "Error liking confession", error: error.message });
     }
@@ -156,7 +208,6 @@ module.exports.addComment = async (req, res) => {
         await confession.save();
         const updatedConfession = await Confession.findById(confessionId).populate("comments.user").populate("user");
 
-        console.log(updatedConfession);
 
         res.status(201).json(updatedConfession);
     } catch (error) {
@@ -170,7 +221,7 @@ module.exports.deleteConfession = async (req, res) => {
         const { confessionId } = req.params;
         const userId = req.user.id;
 
-        const confession = await Confession.findById(confessionId);
+        const confession = await Confession.findByIdAndDelete(confessionId);
         if (!confession) {
             return res.status(404).json({ message: "Confession not found" });
         }
@@ -179,7 +230,6 @@ module.exports.deleteConfession = async (req, res) => {
             return res.status(403).json({ message: "Not authorized to delete this confession" });
         }
 
-        await confession.remove();
         res.json({ message: "Confession deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Error deleting confession", error: error.message });

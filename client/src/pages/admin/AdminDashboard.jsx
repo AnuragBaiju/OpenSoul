@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { FaTrashCan } from "react-icons/fa6";
-import { getConfessionGroups, getStudents } from "../../apis/adminApis";
+import { deleteConfession, getConfessionGroups, getStudents, groupConfessions } from "../../apis/adminApis";
 import { checkAuthStatus } from "../../features/authSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { CiSettings } from "react-icons/ci";
+
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
     const [groups, setGroups] = useState([]);
     const [students, setStudents] = useState([]);
-    const [selectedGroup, setSelectedGroup] = useState(null);
+    const [selectedGroupConfessions, setSelectedGroupConfessions] = useState(null);
+    const [selectedGroup, setSelectedGroup] = useState("");
     const [newStudent, setNewStudent] = useState({ studentId: "", name: "" });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { user } = useSelector((state) => state.auth);
 
-   
+    const navigate = useNavigate();
+
     // Animation variants
     const cardVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -48,14 +52,15 @@ const AdminDashboard = () => {
     };
 
     const fetchGroupConfessions = async (groupId) => {
-        const res = await axios.get(`${API_BASE_URL}/confession-group/${groupId}`);
-        setSelectedGroup(res.data.data);
+        const data = await groupConfessions(groupId);
+        console.log(data);
+        setSelectedGroupConfessions(data);
     };
 
     // Handlers
-    const deleteConfession = async (groupId, confessionId) => {
+    const handleDeleteConfession = async (groupId, confessionId) => {
         // Assuming confessions are nested in group data
-        await axios.delete(`${API_BASE_URL}/confession-group/${groupId}/confession/${confessionId}`);
+        await deleteConfession(groupId, confessionId);
         fetchGroupConfessions(groupId);
     };
 
@@ -65,16 +70,6 @@ const AdminDashboard = () => {
         setNewStudent({ studentId: "", name: "" });
         setIsModalOpen(false);
         fetchStudents();
-    };
-
-    const blockStudent = async (studentId) => {
-        await axios.put(`${API_BASE_URL}/student/${studentId}`, { blocked: true });
-        fetchStudents();
-    };
-
-    const deleteGroup = async (groupId) => {
-        await axios.delete(`${API_BASE_URL}/confession-group/${groupId}`);
-        fetchGroups();
     };
 
     return (
@@ -91,25 +86,30 @@ const AdminDashboard = () => {
                         initial="hidden"
                         animate="visible"
                     >
-                        <h2 className="text-2xl font-semibold text-green-800 mb-4">Confession Groups</h2>
+                        <div className=" flex items-center mb-4 gap-2 justify-between">
+                            <h2 className="text-2xl font-semibold text-green-800 ">Confession Groups</h2>
+                            <button
+                                onClick={() => navigate("/admin/groups")}
+                                className="bg-gray-200 flex  items-center gap-1  px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                <CiSettings /> Manage
+                            </button>
+                        </div>
                         <div className="space-y-4 max-h-96 overflow-y-auto">
                             {groups?.map((group) => (
                                 <div
                                     key={group._id}
                                     className="flex justify-between items-center p-3 bg-green-50 rounded-lg"
                                 >
-                                    <span
+                                    <p
                                         className="text-green-700 cursor-pointer hover:underline"
-                                        onClick={() => fetchGroupConfessions(group._id)}
+                                        onClick={() => {
+                                            fetchGroupConfessions(group._id);
+                                            setSelectedGroup(group);
+                                        }}
                                     >
                                         {group.name}
-                                    </span>
-                                    <button
-                                        onClick={() => deleteGroup(group.id)}
-                                        className="text-red-500 cursor-pointer hover:scale-110 transition duration-300 hover:text-red-600"
-                                    >
-                                        <FaTrashCan size={20} />
-                                    </button>
+                                    </p>
                                 </div>
                             ))}
                         </div>
@@ -123,26 +123,31 @@ const AdminDashboard = () => {
                         animate="visible"
                     >
                         <h2 className="text-2xl font-semibold text-green-800 mb-4">
-                            {selectedGroup ? `${selectedGroup.name} Confessions` : "Select a Group"}
+                            {selectedGroupConfessions ? `${selectedGroup.name} Confessions` : "Select a Group"}
                         </h2>
                         <div className="space-y-4 max-h-96 overflow-y-auto">
-                            {selectedGroup?.confessions?.map((conf) => (
-                                <div
-                                    key={conf.id}
-                                    className="p-4 bg-green-50 rounded-lg flex justify-between items-start"
-                                >
-                                    <div>
-                                        <p className="text-gray-800">{conf.text}</p>
-                                        <p className="text-sm text-gray-500">By: {conf.author}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => deleteConfession(selectedGroup.id, conf.id)}
-                                        className="text-red-500 hover:text-red-700"
+                            {(selectedGroupConfessions &&
+                                selectedGroupConfessions.length > 0 &&
+                                selectedGroupConfessions?.map((conf) => (
+                                    <div
+                                        key={conf._id}
+                                        className="p-4 bg-green-50 rounded-lg flex justify-between items-start"
                                     >
-                                        Delete
-                                    </button>
-                                </div>
-                            )) || <p className="text-gray-500">Select a group to view confessions.</p>}
+                                        <div>
+                                            <p className="text-gray-800">{conf.title}</p>
+                                            <p className="text-sm text-gray-500">By: {conf.user.name}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteConfession(selectedGroup._id, conf._id)}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                ))) || <p className="text-gray-500">Select a group to view confessions.</p>}
+                            {selectedGroupConfessions && selectedGroupConfessions.length === 0 && (
+                                <p className="text-red-300">No confessions.</p>
+                            )}
                         </div>
                     </motion.div>
 
@@ -156,10 +161,10 @@ const AdminDashboard = () => {
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold text-green-800">Students</h2>
                             <button
-                                onClick={() => setIsModalOpen(true)}
-                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                onClick={() => navigate("/admin/students")}
+                                className="bg-gray-200 flex  items-center gap-1  px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
                             >
-                                Add Student
+                                <CiSettings /> Manage
                             </button>
                         </div>
                         <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -172,17 +177,6 @@ const AdminDashboard = () => {
                                         <p className="text-green-700">{student.name}</p>
                                         <p className="text-sm text-gray-500">{student.studentId}</p>
                                     </div>
-                                    <button
-                                        onClick={() => blockStudent(student.id)}
-                                        className={`px-3 py-1 rounded-lg ${
-                                            student.blocked
-                                                ? "bg-gray-400 cursor-not-allowed"
-                                                : "bg-red-500 text-white hover:bg-red-600"
-                                        } transition-colors`}
-                                        disabled={student.blocked}
-                                    >
-                                        {student.blocked ? "Blocked" : "Block"}
-                                    </button>
                                 </div>
                             ))}
                         </div>

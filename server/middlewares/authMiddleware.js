@@ -8,7 +8,6 @@ module.exports.verifyToken = (req, res, next) => {
     const userToken = req.cookies.user_token;
     let token = adminToken || userToken; 
 
-    console.log(req.cookies);
 
     if (!token) {
         return res.status(401).json({ message: "Access Denied. No token provided." });

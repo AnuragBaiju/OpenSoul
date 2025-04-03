@@ -123,8 +123,7 @@ const StudentManagement = () => {
                                         onClick={() => handleDelete(student._id)}
                                         className="text-red-600 hover:scale-105 transition duration-300  text-sm ring-2  cursor-pointer font-semibold  flex gap-2 items-center bg-white shadow-lg  px-3 py-1 rounded"
                                     >
-                                        <FaTrashAlt className="   w-[15px] h-[15px] sm:w-[25px] sm:h-[25px] " />{" "}
-                                        Delete
+                                        <FaTrashAlt className="   w-[15px] h-[15px] sm:w-[25px] sm:h-[25px] " /> Delete
                                     </button>
                                 </td>
                             </tr>

@@ -7,6 +7,8 @@ import {
     getConfessionGroups,
     updateConfessionGroup,
 } from "../../apis/adminApis";
+import toast from "react-hot-toast";
+import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 
 const ConfessionGroupManagement = () => {
     const [groups, setGroups] = useState([]);
@@ -18,6 +20,7 @@ const ConfessionGroupManagement = () => {
         bgImage: null, // Changed to null to handle file object
     });
     const [previewImage, setPreviewImage] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchGroups();
@@ -44,6 +47,7 @@ const ConfessionGroupManagement = () => {
 
     const handleCreate = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const submissionData = new FormData();
             submissionData.append("name", formData.name);
@@ -54,19 +58,24 @@ const ConfessionGroupManagement = () => {
 
             console.log(formData);
 
-            
-
             await createConfessionGroup(submissionData);
+            toast.success("Group created!");
             setIsModalOpen(false);
             setFormData({ name: "", description: "", bgImage: null });
             setPreviewImage(null);
+
             fetchGroups();
         } catch (error) {
+            toast.error("Group creation failed!");
             console.error("Error creating group:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleUpdate = async (id) => {
+    const handleUpdate = async (e, id) => {
+        e.preventDefault();
+
         try {
             const submissionData = new FormData();
             submissionData.append("name", formData.name);
@@ -77,7 +86,10 @@ const ConfessionGroupManagement = () => {
 
             await updateConfessionGroup(id, submissionData);
             setIsModalOpen(false);
+            setFormData();
             setPreviewImage(null);
+            setFormData({ name: "", description: "", bgImage: null });
+            setSelectedGroup(nulla);
             fetchGroups();
         } catch (error) {
             console.error("Error updating group:", error);
@@ -96,7 +108,8 @@ const ConfessionGroupManagement = () => {
     };
 
     return (
-        <div className="container mx-auto px-10 py-8">
+        <div className="container mx-auto bg-slate-50 min-h-screen px-10 py-8">
+            {loading && <LoadingSpinner />}
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Confession Groups</h1>
@@ -113,44 +126,54 @@ const ConfessionGroupManagement = () => {
             {/* Groups Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence>
-                    {groups.map((group) => (
-                        <motion.div
-                            key={group._id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="bg-white rounded-lg shadow-md overflow-hidden"
-                        >
-                            <img src={group.bgImage} alt={group.name} className="w-full h-48 object-cover" />
-                            <div className="p-4">
-                                <h2 className="text-xl font-semibold text-gray-800">{group.name}</h2>
-                                <p className="text-gray-600 mt-2">{group.description}</p>
-                                <div className="mt-4 flex justify-between">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedGroup(group);
-                                            setFormData({
-                                                name: group.name,
-                                                description: group.description,
-                                                bgImage: group.bgImage, // Keep original URL initially
-                                            });
-                                            setPreviewImage(group.bgImage);
-                                            setIsModalOpen(true);
-                                        }}
-                                        className="text-blue-600 font-bold cursor-pointer hover:text-blue-800"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(group._id)}
-                                        className="text-red-600 font-bold cursor-pointer hover:text-red-800"
-                                    >
-                                        Delete
-                                    </button>
+                    {groups
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                        .map((group) => (
+                            <motion.div
+                                key={group._id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="bg-white rounded-lg shadow-md overflow-hidden"
+                            >
+                                <div className=" w-full h-30 flex justify-center items-center">
+                                    <div className=" w-14 h-14">
+                                        <img
+                                            src={group.groupIcon}
+                                            alt={group.name}
+                                            className="  w-full h-full  object-cover"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                                <div className="p-4">
+                                    <h2 className="text-xl font-semibold text-gray-800">{group.name}</h2>
+                                    <p className="text-gray-600 mt-2">{group.description}</p>
+                                    <div className="mt-4 flex justify-between">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedGroup(group);
+                                                setFormData({
+                                                    name: group.name,
+                                                    description: group.description,
+                                                    bgImage: group.bgImage, // Keep original URL initially
+                                                });
+                                                setPreviewImage(group.bgImage);
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="text-blue-600 font-bold cursor-pointer hover:text-blue-800"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(group._id)}
+                                            className="text-red-600 font-bold cursor-pointer hover:text-red-800"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
                 </AnimatePresence>
             </div>
 
@@ -172,7 +195,7 @@ const ConfessionGroupManagement = () => {
                             <h2 className="text-2xl font-bold mb-4">
                                 {selectedGroup ? "Edit Group" : "Create New Group"}
                             </h2>
-                            <form onSubmit={selectedGroup ? (e) => handleUpdate(selectedGroup._id) : handleCreate}>
+                            <form onSubmit={selectedGroup ? (e) => handleUpdate(e, selectedGroup._id) : handleCreate}>
                                 <div className="mb-4">
                                     <label className="block text-gray-700 mb-2">Name</label>
                                     <input
@@ -201,12 +224,25 @@ const ConfessionGroupManagement = () => {
                                         className="w-full p-2 border rounded"
                                     />
                                     {previewImage && (
-                                        <div className="mt-2">
-                                            <img
-                                                src={previewImage}
-                                                alt="Preview"
-                                                className="w-full h-32 object-cover rounded"
-                                            />
+                                        <div className=" flex justify-center bg-slate-50 items-center">
+                                            <div className="rounded-xl w-1/2 text-center overflow-hidden bg-white shadow-lg transition-all duration-700 h-full flex flex-col justify-between">
+                                                {/* Foreground Content */}
+                                                <div className="  font-semibold   w-full h-full p-6 flex flex-col items-center gap-3 justify-between">
+                                                    <div className="w-14 h-14  overflow-hidden rounded-full ">
+                                                        <img className=" object-contain" src={previewImage} alt="" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div>
+                                                            <h3 className="text-xl font-semibold mb-2 line-clamp-1">
+                                                                {formData.name}
+                                                            </h3>
+                                                        </div>
+                                                        <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                                                            {formData.description}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -223,7 +259,10 @@ const ConfessionGroupManagement = () => {
                                     >
                                         Cancel
                                     </button>
-                                    <button type="submit" className="px-4 py-2 ring-2 ring-blue-500 text-black cursor-pointer rounded">
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 ring-2 ring-blue-500 text-black cursor-pointer rounded"
+                                    >
                                         {selectedGroup ? "Update" : "Create"}
                                     </button>
                                 </div>
@@ -232,6 +271,7 @@ const ConfessionGroupManagement = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {}
         </div>
     );
 };

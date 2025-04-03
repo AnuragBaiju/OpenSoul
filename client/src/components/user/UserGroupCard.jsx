@@ -1,33 +1,25 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-
-
 const UserGroupCard = ({ group }) => {
-    const navigate = useNavigate()
-    
+    const navigate = useNavigate();
+
     return (
-        <div onClick={()=>navigate(`/confession-page/${group._id}`)} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
-            <div className="relative group rounded-xl overflow-hidden text-white shadow-lg transition-all duration-700 h-full flex flex-col justify-between">
-                {/* Background Image Layer */}
-
-                <img
-                    src={group?.bgImage}
-                    alt={`${group?.name} background`}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 scale-100 group-hover:scale-110"
-                    loading="lazy" // Native lazy loading
-                />
-
+        <div
+            onClick={() => navigate(`/confession-page/${group._id}`)}
+            className="w-full h-56 justify-center  text-center sm:w-1/2 md:w-1/3 lg:w-1/4 p-4"
+        >
+            <div className="rounded-xl overflow-hidden bg-white shadow-lg transition-all duration-700 h-full flex flex-col justify-between">
                 {/* Foreground Content */}
-                <div className="relative font-semibold bg-[rgba(29,28,28,0.6)] w-full h-full p-6 flex flex-col justify-between">
-                    <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                            <h3 className="text-xl font-bold mb-2 line-clamp-1">{group?.name}</h3>
-                        </div>
-                        <p className="text-gray-300 text-sm mb-4 line-clamp-2">{group?.description}</p>
+                <div className="  font-semibold   w-full h-full p-6 flex flex-col items-center gap-3 justify-between">
+                    <div className="w-14 h-14  rounded-full ">
+                        <img className="object-contain" src={group?.groupIcon} alt="" />
                     </div>
-                    <div className="flex justify-between items-center text-xs text-white">
-                        <span>Created by: {group?.createdBy.substring(0, 8)}...</span>
+                    <div className="flex-1">
+                        <div>
+                            <h3 className="text-xl font-semibold mb-2 line-clamp-1">{group?.name}</h3>
+                        </div>
+                        <p className="font-thin text-sm mb-4 line-clamp-2">{group?.description}</p>
                     </div>
                 </div>
             </div>

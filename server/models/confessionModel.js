@@ -12,10 +12,17 @@ const confessionSchema = new mongoose.Schema(
             ref: "ConfessionGroup",
             required: true,
         },
-        text: {
+        title: {
             type: String,
             required: true,
-            trim: true,
+        },
+        body: {
+            type: String,
+            required: true,
+        },
+        image: {
+            type: String,
+
         },
         likes: [
             {
@@ -32,6 +39,7 @@ const confessionSchema = new mongoose.Schema(
                 text: {
                     type: String,
                     required: true,
+                    trim: true,
                 },
                 createdAt: {
                     type: Date,

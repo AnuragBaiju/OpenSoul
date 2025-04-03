@@ -8,16 +8,19 @@ router.use(verifyToken);
 
 router
     .route("/confession-group")
-    .post(upload.single("bgImage"),adminController.createConfessionGroup)
+    .post(upload.single("bgImage"), adminController.createConfessionGroup)
     .get(adminController.getAllConfessionGroups);
 
 router
     .route("/confession-group/:id")
     .get(adminController.getConfessionGroup)
-    .put(adminController.updateConfessionGroup)
+    .put(upload.single("bgImage"), adminController.updateConfessionGroup)
     .delete(adminController.deleteConfessionGroup);
 
 router.route("/confession-group/:id/add-member").put(adminController.addMember);
+
+router.get("/confessions/:groupId", adminController.getGroupConfessions);
+router.delete("/confession-group/:groupId/confession/:confessionId", adminController.deleteConfession);
 
 router.get("/student", adminController.getAllStudents);
 router.get("/student/:id", adminController.getStudentById);

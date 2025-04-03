@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { adminInstance } from "../config/axiosConfig";
 
 export const getStudents = async () => {
@@ -25,7 +26,8 @@ export const addStudent = async (formData) => {
         const response = await adminInstance.post(`/student`, formData);
         return response.data;
     } catch (error) {
-        console.error("Login API error:", error);
+        console.error("add student API error:", error);
+        toast.error(error.response.data.message);
         throw error;
     }
 };
@@ -64,6 +66,7 @@ export const createConfessionGroup = async (data) => {
 export const updateConfessionGroup = async (groupId, data) => {
     try {
         const response = await adminInstance.put(`/confession-group/${groupId}`, data);
+        console.log(response);
         return response.data;
     } catch (error) {
         console.error("update confession group API error:", error);
@@ -76,6 +79,27 @@ export const deleteConfessionGroup = async (groupId) => {
         return response.data;
     } catch (error) {
         console.error("delete confession group API error:", error);
+        throw error;
+    }
+};
+
+export const groupConfessions = async (groupId) => {
+    try {
+        const response = await adminInstance.get(`/confessions/${groupId}`);
+        return response.data.confessions;
+    } catch (error) {
+        console.error("get group confessions API error:", error);
+        throw error;
+    }
+};
+
+export const deleteConfession = async (groupId, confessionId) => {
+    try {
+        const response = await adminInstance.delete(`/confession-group/${groupId}/confession/${confessionId}`);
+        console.log(response.data);
+        return response.data.data;
+    } catch (error) {
+        console.error("delete confessions API error:", error);
         throw error;
     }
 };

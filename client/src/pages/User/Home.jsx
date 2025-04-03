@@ -18,7 +18,7 @@ const Home = () => {
     }, []);
 
     return (
-        <div className="w-screen">
+        <div className="w-screen bg-slate-100">
             <UserGroups/>
             <ConfessionGroups groups={confessionGroups} />
         </div>

@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authInstance } from "../config/axiosConfig";
 
 // Check authentication on page load
+
 export const checkAuthStatus = createAsyncThunk("auth/checkStatus", async (role, { rejectWithValue }) => {
     try {
         const response = await authInstance.get(`/me`);
-        console.log(response);
         if (response.data.role !== role) {
             if (role === "User") {
                 return window.location.replace("/login");
@@ -15,6 +15,17 @@ export const checkAuthStatus = createAsyncThunk("auth/checkStatus", async (role,
         return response.data;
     } catch (error) {
         return rejectWithValue("Not authenticated");
+    }
+});
+
+// logout
+
+export const logout = createAsyncThunk("auth/logout", async (_, { rejectWithValue }) => {
+    try {
+        await authInstance.delete("/logout", {}, { withCredentials: true });
+        return null; // Clearing user state
+    } catch (error) {
+        return rejectWithValue("Logout failed");
     }
 });
 
