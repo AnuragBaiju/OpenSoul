@@ -10,7 +10,7 @@
 **Live Demo URL:** **[https://dtec4q6273imy.cloudfront.net/z](https://dtec4q6273imy.cloudfront.net/z)**
 
 <p align="center">
-  <img src=".github/assets/Screenshot%202025-03-31%20at%2013.42.17.png" alt="Open Soul Landing Page" width="90%">
+  <img src=".github/assets/01-landing-page.png" alt="Open Soul Landing Page" width="90%">
 </p>
 
 ---
@@ -20,7 +20,7 @@
 Students can post confessions with a title, description, and an optional image within various discussion groups. They can also interact with posts through reactions and comments, fostering a supportive community. To maintain safety, students can also delete their own confessions.
 
 <p align="center">
-  <img src=".github/assets/Screenshot%202025-03-31%20at%2013.43.11.png" alt="Confession Feed" width="80%">
+  <img src=".github/assets/02-confession-feed.png" alt="Confession Feed" width="80%">
 </p>
 
 ### **Role-Based Access Control**
@@ -29,7 +29,7 @@ The platform features distinct login interfaces and dashboards for students and 
 * **Admins** have elevated privileges to manage the platform's content and users.
 
 <p align="center">
-  <img src=".github/assets/Screenshot%202025-03-31%20at%2014.35.30.png" alt="Student Sign-in" width="80%">
+  <img src=".github/assets/03-student-signin.png" alt="Student Sign-in" width="80%">
 </p>
 
 ### **Comprehensive Admin Management**
@@ -39,7 +39,7 @@ Administrators have a powerful dashboard to ensure the platform remains a safe s
 * **Content Moderation**: A centralized dashboard allows admins to view and manage all confessions, students, and groups.
 
 <p align="center">
-  <img src=".github/assets/Screenshot%202025-03-31%20at%2014.45.55.png" alt="Admin Group Management Dashboard" width="80%">
+  <img src=".github/assets/04-admin-dashboard.png" alt="Admin Group Management Dashboard" width="80%">
 </p>
 
 ---
